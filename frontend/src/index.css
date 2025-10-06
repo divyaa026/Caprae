@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Brand Colors - Enterprise SaaS */
+    --background: 210 20% 98%;
+    --foreground: 215 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    /* Primary - Dark Blue Brand */
+    --primary: 215 50% 25%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 215 50% 20%;
+
+    /* Secondary Actions */
+    --secondary: 215 20% 95%;
+    --secondary-foreground: 215 25% 15%;
+    --secondary-hover: 215 20% 90%;
+
+    /* Muted Elements */
+    --muted: 215 20% 95%;
+    --muted-foreground: 215 15% 45%;
+
+    /* Accent - Purple */
+    --accent: 270 70% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Status Colors */
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 25 95% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Priority Tier Colors */
+    --hot: 0 85% 60%;
+    --hot-light: 0 85% 95%;
+    --warm: 25 95% 50%;
+    --warm-light: 25 95% 95%;
+    --cold: 215 80% 55%;
+    --cold-light: 215 80% 95%;
+
+    /* Gradients */
+    --gradient-hot: linear-gradient(135deg, hsl(0 85% 60%) 0%, hsl(0 85% 70%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(25 95% 50%) 0%, hsl(25 95% 60%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(142 70% 45%) 0%, hsl(142 70% 55%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(270 70% 50%) 0%, hsl(270 70% 60%) 100%);
+
+    /* UI Elements */
+    --border: 215 20% 88%;
+    --input: 215 20% 88%;
+    --ring: 215 50% 25%;
+
+    --radius: 0.5rem;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(215 25% 15% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(215 25% 15% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(215 25% 15% / 0.1);
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 215 25% 10%;
+    --foreground: 210 20% 98%;
+
+    --card: 215 25% 12%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 215 25% 12%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 215 50% 55%;
+    --primary-foreground: 215 25% 10%;
+    --primary-hover: 215 50% 60%;
+
+    --secondary: 215 25% 18%;
+    --secondary-foreground: 210 20% 98%;
+    --secondary-hover: 215 25% 22%;
+
+    --muted: 215 25% 18%;
+    --muted-foreground: 215 15% 65%;
+
+    --accent: 270 70% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 25% 22%;
+    --input: 215 25% 22%;
+    --ring: 215 50% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
