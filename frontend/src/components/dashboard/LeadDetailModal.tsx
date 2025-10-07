@@ -1,6 +1,7 @@
-import React from "react";
-import { X, Clock, Users as NetworkIcon, TrendingUp, Target } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, Clock, Users as NetworkIcon, TrendingUp, Target, Brain, Loader2, Lightbulb } from "lucide-react";
 import { Lead } from "@/types/lead";
+import { useAIInsights } from "@/hooks/useAIInsights";
 
 interface LeadDetailModalProps {
   lead: Lead | null;
@@ -9,6 +10,30 @@ interface LeadDetailModalProps {
 }
 
 export function LeadDetailModal({ lead, isOpen, onClose }: LeadDetailModalProps) {
+  const { insights, generateInsights, generateOutreach, isAIEnabled } = useAIInsights();
+  const [outreachSuggestions, setOutreachSuggestions] = useState<any>(null);
+  const [loadingOutreach, setLoadingOutreach] = useState(false);
+
+  useEffect(() => {
+    if (lead && isOpen) {
+      generateInsights(lead);
+    }
+  }, [lead, isOpen, generateInsights]);
+
+  const handleGenerateOutreach = async () => {
+    if (!lead) return;
+    
+    setLoadingOutreach(true);
+    try {
+      const suggestions = await generateOutreach(lead);
+      setOutreachSuggestions(suggestions);
+    } catch (error) {
+      console.error('Failed to generate outreach suggestions:', error);
+    } finally {
+      setLoadingOutreach(false);
+    }
+  };
+
   if (!isOpen || !lead) return null;
 
   return (
@@ -77,6 +102,133 @@ export function LeadDetailModal({ lead, isOpen, onClose }: LeadDetailModalProps)
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* AI-Powered Insights Section */}
+          <div className="mb-6">
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 border border-purple-200">
+              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                <Brain className="h-5 w-5 mr-2 text-purple-600" />
+                AI-Powered Intelligence
+                {isAIEnabled && (
+                  <span className="ml-2 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                    Live AI
+                  </span>
+                )}
+              </h3>
+              
+              {insights.loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-purple-600 mr-2" />
+                  <span className="text-gray-600">Analyzing lead with AI...</span>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* AI Confidence Score */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">AI Confidence Score</span>
+                    <div className="flex items-center">
+                      <div className="w-24 bg-gray-200 rounded-full h-2 mr-2">
+                        <div 
+                          className={`h-2 rounded-full ${insights.confidence > 80 ? 'bg-green-500' : insights.confidence > 60 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                          style={{ width: `${insights.confidence}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-800">{insights.confidence}%</span>
+                    </div>
+                  </div>
+
+                  {/* AI Recommendations */}
+                  {insights.recommendations && (
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-2 flex items-center">
+                        <Lightbulb className="h-4 w-4 mr-1 text-yellow-500" />
+                        AI Recommendations
+                      </h4>
+                      <p className="text-sm text-gray-600 bg-white p-3 rounded border">
+                        {insights.recommendations}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Next Actions */}
+                  {insights.nextActions.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-2">🚀 Suggested Next Actions</h4>
+                      <ul className="text-sm text-gray-600 space-y-1">
+                        {insights.nextActions.map((action, index) => (
+                          <li key={index} className="flex items-center">
+                            <span className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-2"></span>
+                            {action}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* AI-Generated Outreach */}
+                  <div className="pt-4 border-t border-purple-100">
+                    <button
+                      onClick={handleGenerateOutreach}
+                      disabled={loadingOutreach}
+                      className="flex items-center text-purple-600 hover:text-purple-700 font-medium text-sm"
+                    >
+                      {loadingOutreach ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : (
+                        <Brain className="h-4 w-4 mr-2" />
+                      )}
+                      Generate AI Outreach Strategy
+                    </button>
+                  </div>
+
+                  {/* Outreach Suggestions */}
+                  {outreachSuggestions && (
+                    <div className="mt-4 bg-white p-4 rounded border">
+                      <h4 className="font-medium text-gray-700 mb-3">💬 Personalized Outreach Strategy</h4>
+                      
+                      <div className="space-y-3">
+                        <div>
+                          <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Email Subject</span>
+                          <p className="text-sm text-gray-800 bg-gray-50 p-2 rounded mt-1">
+                            {outreachSuggestions.emailSubject}
+                          </p>
+                        </div>
+
+                        <div>
+                          <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Key Talking Points</span>
+                          <ul className="text-sm text-gray-700 mt-1 space-y-1">
+                            {outreachSuggestions.talkingPoints.map((point: string, index: number) => (
+                              <li key={index} className="flex items-start">
+                                <span className="text-purple-500 mr-2">•</span>
+                                {point}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Timing</span>
+                            <p className="text-sm text-gray-700 mt-1">{outreachSuggestions.timing}</p>
+                          </div>
+                          <div>
+                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Approach</span>
+                            <p className="text-sm text-gray-700 mt-1">{outreachSuggestions.approach}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {insights.error && (
+                <div className="text-sm text-red-600 bg-red-50 p-3 rounded border border-red-200">
+                  {insights.error}
+                </div>
+              )}
             </div>
           </div>
 

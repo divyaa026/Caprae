@@ -4,6 +4,10 @@ import { MetricCards } from "@/components/dashboard/MetricCards";
 import { LeadTable } from "@/components/dashboard/IntelligenceTable";
 import { FilterPanel } from "@/components/dashboard/FilterPanel";
 import { LeadDetailModal } from "@/components/dashboard/LeadDetailModal";
+import { AIDemoMode } from "@/components/dashboard/AIDemoMode";
+import { AIChatAssistant } from "@/components/dashboard/AIChatAssistant";
+import { PredictiveAnalytics } from "@/components/dashboard/PredictiveAnalytics";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Lead } from "@/types/lead";
 
 // Mock data for demonstration
@@ -182,6 +186,24 @@ export default function Index() {
   const [filters, setFilters] = useState<any>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("intelligence");
+  const [isChatMinimized, setIsChatMinimized] = useState(true);
+  
+  // AI Configuration with debug logging
+  const hasGeminiKey = !!import.meta.env.VITE_GEMINI_API_KEY;
+  const aiEnabled = import.meta.env.VITE_AI_ENABLED === 'true';
+  const aiProvider = import.meta.env.VITE_AI_PROVIDER || 'gemini';
+  
+  console.log('Index.tsx - AI Config Debug:');
+  console.log('Has Gemini Key:', hasGeminiKey);
+  console.log('AI Enabled Flag:', aiEnabled);
+  console.log('AI Provider:', aiProvider);
+  
+  const [isAIEnabled, setIsAIEnabled] = useState(
+    aiEnabled && hasGeminiKey
+  );
+  
+  console.log('Index.tsx - Final AI Enabled:', isAIEnabled);
 
   // Apply filters and search
   const applyFilters = (leads: Lead[], currentFilters: any, query: string) => {
@@ -233,8 +255,11 @@ export default function Index() {
 
   // Handle filter changes
   const handleFilterChange = (newFilters: any) => {
+    console.log('Index.tsx - Filter change received:', newFilters);
+    console.log('Index.tsx - Previous filters:', filters);
     setFilters(newFilters);
     const filtered = applyFilters(allLeads, newFilters, searchQuery);
+    console.log('Index.tsx - Filtered leads count:', filtered.length);
     setFilteredLeads(filtered);
   };
 
@@ -256,34 +281,93 @@ export default function Index() {
     <div className="min-h-screen bg-gray-50">
       <Header onSearch={handleSearch} onAddLead={handleAddLead} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        {/* AI Demo Mode Toggle */}
+        <AIDemoMode 
+          isAIEnabled={isAIEnabled} 
+          onToggleAI={setIsAIEnabled} 
+        />
+        
         <MetricCards leads={filteredLeads} />
         
-        {/* Results Summary */}
-        <div className="mt-6 mb-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Lead Intelligence
-            </h2>
-            <div className="text-sm text-gray-600">
-              Showing {filteredLeads.length} of {allLeads.length} leads
-              {searchQuery && (
-                <span className="ml-2 text-blue-600">
-                  • Filtered by "{searchQuery}"
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
+        {/* 🎯 AI FEATURES NAVIGATION */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8 space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="intelligence">📊 Lead Intelligence</TabsTrigger>
+            <TabsTrigger value="predictive">🎯 Predictive Analytics</TabsTrigger>
+            <TabsTrigger value="insights">🧠 AI Insights</TabsTrigger>
+          </TabsList>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-1">
-            <FilterPanel filters={filters} onFilterChange={handleFilterChange} />
-          </div>
-          <div className="lg:col-span-3">
-            <LeadTable leads={filteredLeads} onLeadSelect={handleLeadSelect} />
-          </div>
-        </div>
+          <TabsContent value="intelligence" className="space-y-6">
+            {/* Results Summary */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Lead Intelligence Dashboard
+              </h2>
+              <div className="text-sm text-gray-600">
+                Showing {filteredLeads.length} of {allLeads.length} leads
+                {searchQuery && (
+                  <span className="ml-2 text-blue-600">
+                    • Filtered by "{searchQuery}"
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              <div className="lg:col-span-1">
+                <FilterPanel filters={filters} onFilterChange={handleFilterChange} leads={mockLeads} />
+              </div>
+              <div className="lg:col-span-3">
+                <LeadTable leads={filteredLeads} onLeadSelect={handleLeadSelect} />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="predictive" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">
+                🎯 AI Predictive Analytics
+              </h2>
+              <div className="text-sm text-gray-600">
+                AI-powered success probability modeling and deal forecasting
+              </div>
+            </div>
+            <PredictiveAnalytics leads={allLeads} />
+          </TabsContent>
+
+          <TabsContent value="insights" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">
+                🧠 AI Strategic Insights
+              </h2>
+              <div className="text-sm text-gray-600">
+                Real-time AI analysis and strategic recommendations
+              </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Portfolio Overview</h3>
+                <MetricCards leads={allLeads} />
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Top Priority Leads</h3>
+                <LeadTable 
+                  leads={filteredLeads.filter(l => l.confidence > 75).slice(0, 5)} 
+                  onLeadSelect={handleLeadSelect} 
+                />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
+      
+      {/* 🎯 AI FEATURE #5: Real-time AI Chat Assistant */}
+      <AIChatAssistant 
+        leads={allLeads}
+        isMinimized={isChatMinimized}
+        onToggleMinimize={() => setIsChatMinimized(!isChatMinimized)}
+      />
       
       <LeadDetailModal 
         lead={selectedLead}
